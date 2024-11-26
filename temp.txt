@@ -1,0 +1,3 @@
+npx create-react-app groq1
+cd groq1
+npm start
