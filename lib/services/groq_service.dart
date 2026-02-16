@@ -12,12 +12,11 @@ class GroqService {
 
   GroqService(this._tokenService);
 
-  Future<Stream<String>> chatStream({
+  Stream<String> chatStream({
     required String apiKey,
-    required Conversation conversation,
     required List<Message> messages,
     required String model,
-  }) async {
+  }) async* {
     try {
       // 1. Prepare messages (optimize context if needed)
       final optimizedMessages = _tokenService.optimizeContext(messages);
@@ -26,9 +25,9 @@ class GroqService {
       final data = {
         'model': model,
         'messages': optimizedMessages.map((m) => {
-          'role': m.role,
-          'content': m.content,
-        }).toList(),
+              'role': m.role,
+              'content': m.content,
+            }).toList(),
         'stream': true,
         'temperature': 0.7,
       };
@@ -47,32 +46,31 @@ class GroqService {
       );
 
       // 4. Parse stream
-      Stream<List<int>> stream = response.data.stream;
-      return stream
+      final Stream<List<int>> byteStream = response.data.stream;
+      final lines = byteStream
           .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .map((line) {
-            if (line.startsWith('data: ')) {
-              final data = line.substring(6);
-              if (data == '[DONE]') return '';
-              try {
-                final json = jsonDecode(data);
-                final content = json['choices'][0]['delta']['content'] ?? '';
-                // Check usage if available (usually in final chunk)
-                if (json.containsKey('usage')) {
-                  // TODO: Handle usage update
-                }
-                return content;
-              } catch (e) {
-                return '';
-              }
+          .transform(const LineSplitter());
+
+      await for (final line in lines) {
+        if (line.startsWith('data: ')) {
+          final payload = line.substring(6);
+          if (payload == '[DONE]') return;
+          try {
+            final json = jsonDecode(payload);
+            final content =
+                json['choices']?[0]?['delta']?['content'] as String? ?? '';
+            if (content.isNotEmpty) {
+              yield content;
             }
-            return '';
-          })
-          .where((content) => content.isNotEmpty);
+          } catch (_) {
+            // Skip malformed chunks
+          }
+        }
+      }
     } catch (e) {
       if (e is DioException) {
-         throw Exception('Groq API Error: ${e.response?.statusCode} - ${e.response?.statusMessage}');
+        throw Exception(
+            'Groq API Error: ${e.response?.statusCode} - ${e.response?.statusMessage}');
       }
       rethrow;
     }
@@ -87,7 +85,7 @@ class GroqService {
         ),
       );
     } catch (e) {
-       throw Exception('Invalid API Key');
+      throw Exception('Invalid API Key');
     }
   }
 }

@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../providers/chat_provider.dart';
 import '../services/storage_service.dart';
 import 'settings_screen.dart';
-import '../models/conversation.dart';
-import '../models/message.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

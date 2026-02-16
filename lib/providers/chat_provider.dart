@@ -35,8 +35,7 @@ class ChatProvider with ChangeNotifier {
   // Initialize: Load conversations from storage
   Future<void> loadConversation(String id) async {
     _activeConversationId = id;
-    final convMessages = await _storageService.getMessages(id);
-    _messages = convMessages;
+    _messages = _storageService.getMessages(id);
     notifyListeners();
   }
 
@@ -87,9 +86,8 @@ class ChatProvider with ChangeNotifier {
 
     try {
       // 3. Call API
-      final stream = await _groqService.chatStream(
+      final stream = _groqService.chatStream(
         apiKey: _storageService.getSettings().apiKey!,
-        conversation: _storageService.getConversation(_activeConversationId!), // Get conversation if needed
         messages: _messages,
         model: _storageService.getSettings().selectedModel,
       );
