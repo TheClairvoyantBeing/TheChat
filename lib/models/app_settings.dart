@@ -18,7 +18,7 @@ class AppSettings extends HiveObject {
 
   AppSettings({
     this.apiKey,
-    this.selectedModel = 'llama-3.3-70b-versatile',
+    this.selectedModel = 'gemini-2.0-flash',
     this.isDarkMode = true,
     this.showTokenUsage = true,
   });

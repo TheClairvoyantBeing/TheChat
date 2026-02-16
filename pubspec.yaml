@@ -1,5 +1,5 @@
 name: the_chat
-description: A local-first, privacy-focused chatbot powered by Groq API.
+description: A local-first, privacy-focused chatbot powered by Google Gemini.
 publish_to: "none"
 version: 1.0.0+1
 
@@ -12,7 +12,7 @@ dependencies:
 
   # Core
   provider: ^6.1.1
-  dio: ^5.4.0
+  google_generative_ai: ^0.4.6
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   uuid: ^4.3.3

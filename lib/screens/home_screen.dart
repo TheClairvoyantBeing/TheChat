@@ -28,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final conversations = context.read<StorageService>().getConversations();
       if (conversations.isNotEmpty) {
         // Load most recent
-        await chatProvider.loadConversation(conversations.first.id);
+        chatProvider.loadConversation(conversations.first.id);
       } else {
         await chatProvider.startNewConversation();
       }
@@ -128,12 +128,31 @@ class _HomeScreenState extends State<HomeScreen> {
                         itemCount: chat.messages.length + (chat.isStreaming ? 1 : 0),
                         itemBuilder: (context, index) {
                           if (index == chat.messages.length) {
-                            // Streaming placeholder
-                            return const Align(
+                            // Live streaming bubble
+                            final streamText = chat.streamBuffer;
+                            return Align(
                               alignment: Alignment.centerLeft,
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                              child: Container(
+                                constraints: const BoxConstraints(maxWidth: 700),
+                                margin: const EdgeInsets.symmetric(vertical: 8),
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                  borderRadius: BorderRadius.circular(16).copyWith(
+                                    bottomLeft: Radius.zero,
+                                  ),
+                                ),
+                                child: streamText.isEmpty
+                                    ? const SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      )
+                                    : MarkdownBody(
+                                        data: streamText,
+                                        selectable: true,
+                                        styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)),
+                                      ),
                               ),
                             );
                           }

@@ -23,6 +23,15 @@ class StorageService {
     // Create default settings if not exist
     if (_settingsBox.isEmpty) {
       await _settingsBox.put('default', AppSettings());
+    } else {
+      // Migrate: fix stale model names from previous API (Groq -> Gemini)
+      final settings = _settingsBox.get('default')!;
+      if (settings.selectedModel.contains('llama') || 
+          settings.selectedModel.contains('mixtral') ||
+          settings.selectedModel.contains('groq')) {
+        settings.selectedModel = 'gemini-2.0-flash';
+        await settings.save();
+      }
     }
   }
 

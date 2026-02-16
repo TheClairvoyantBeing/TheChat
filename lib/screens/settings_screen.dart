@@ -66,9 +66,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           TextField(
             controller: _apiKeyController,
             decoration: const InputDecoration(
-              labelText: 'Groq API Key',
+              labelText: 'Gemini API Key',
               border: OutlineInputBorder(),
-              hintText: 'gsk_...',
+              hintText: 'AIza...',
             ),
             obscureText: true,
           ),

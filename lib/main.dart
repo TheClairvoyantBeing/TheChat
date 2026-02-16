@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart'; // For ValueListenableBuilder on Box
 
-import 'services/groq_service.dart';
+import 'services/gemini_service.dart';
 import 'services/storage_service.dart';
 import 'services/token_service.dart';
 import 'providers/chat_provider.dart';
@@ -17,16 +17,16 @@ void main() async {
   await storageService.init();
 
   final tokenService = TokenService();
-  final groqService = GroqService(tokenService);
+  final geminiService = GeminiService(tokenService);
 
   runApp(
     MultiProvider(
       providers: [
         Provider<StorageService>.value(value: storageService),
         Provider<TokenService>.value(value: tokenService),
-        Provider<GroqService>.value(value: groqService),
+        Provider<GeminiService>.value(value: geminiService),
         ChangeNotifierProvider(
-          create: (_) => ChatProvider(groqService, storageService, tokenService),
+          create: (_) => ChatProvider(geminiService, storageService, tokenService),
         ),
       ],
       child: const TheChatApp(),
