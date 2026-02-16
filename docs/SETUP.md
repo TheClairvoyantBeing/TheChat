@@ -2,11 +2,20 @@
 
 ## Prerequisites
 
-1.  **Flutter SDK**: The core framework for the app.
+1.  **Developer Mode (Windows only)**:
+    - Go to Settings -> Privacy & Security -> For Developers (or run `start ms-settings:developers`).
+    - Turn **On** "Developer Mode". This is required for Flutter to create symlinks for plugins.
+
+2.  **Visual Studio Build Tools (Windows only)**:
+    - Install Visual Studio 2022 Community or Build Tools.
+    - During installation, select the **"Desktop development with C++"** workload.
+    - This is required to compile Windows desktop apps.
+
+3.  **Flutter SDK**: The core framework for the app.
     - Download from [flutter.dev](https://flutter.dev/docs/get-started/install/windows) or run `git clone https://github.com/flutter/flutter.git -b stable C:\path\to\flutter`.
     - Add Flutter to your PATH (search "Edit environment variables for your account" on Windows).
-2.  **Groq API Key**: Sign up at [Groq Cloud](https://console.groq.com/keys) to get your free API key.
-3.  **VS Code + Flutter Extension**: Recommended for the best development experience.
+4.  **Groq API Key**: Sign up at [Groq Cloud](https://console.groq.com/keys) to get your free API key.
+5.  **VS Code + Flutter Extension**: Recommended for the best development experience.
 
 ---
 

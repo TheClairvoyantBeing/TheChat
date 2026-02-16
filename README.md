@@ -24,6 +24,14 @@ A local-first, privacy-focused chatbot powered by the Groq API and Flutter.
 flutter run -d windows
 ```
 
+### Run on Web (Browser)
+
+No additional setup required!
+
+```bash
+flutter run -d chrome
+```
+
 ### Run on Android
 
 Connect your device and enable USB debugging.
@@ -37,3 +45,4 @@ flutter run -d <device-id>
 - [Setup Guide](docs/SETUP.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Token Management](docs/TOKEN_MANAGEMENT.md)
+- [Build Guide](docs/BUILD.md)
