@@ -1,58 +1,56 @@
-# Build Guide for TheChat
+# Build Guide
 
-This guide explains how to build the application for distribution (Release mode).
+How to build TheChat for distribution (Release mode).
 
-## 1. Windows Build (Desktop)
+## Prerequisites
 
-To create a standalone `.exe` file that you can share or run without the terminal:
+- Flutter SDK (3.x+)
+- Visual Studio Build Tools with **Desktop development with C++** workload (Windows only)
+- Developer Mode enabled on Windows (Settings → Privacy & Security → For Developers)
 
-0.  **Enable Developer Mode**:
-    - Go to Settings -> Privacy & Security -> For Developers (or run `start ms-settings:developers`).
-    - Turn **On** "Developer Mode". This is required for Flutter to create symlinks for plugins.
+## Windows Desktop
 
-1.  Open your terminal in the project folder.
-2.  Run the build command:
-    ```powershell
-    C:\Users\evion\tools\flutter\bin\flutter.bat build windows
-    ```
-3.  **Output Location**:
-    The built files will be in:
-    `build\windows\x64\runner\Release\`
+```powershell
+flutter build windows
+```
 
-    Look for `the_chat.exe`. You need to COPY the entire `Release` folder to share it, as it contains necessary DLLs and the `data` folder.
+**Output:** `build\windows\x64\runner\Release\`
 
-## 2. Android Build (Mobile)
+Copy the **entire** `Release\` folder to distribute. It contains `the_chat.exe` plus required DLLs and assets.
 
-To create an APK file that you can install on an Android phone:
+## Android APK
 
-1.  Open your terminal.
-2.  Run the build command:
-    ```powershell
-    C:\Users\evion\tools\flutter\bin\flutter.bat build apk
-    ```
-3.  **Output Location**:
-    The APK will be in:
-    `build\app\outputs\flutter-apk\app-release.apk`
+```powershell
+flutter build apk
+```
 
-    Transfer this file to your phone and install it (you may need to enable "Install from Unknown Sources").
+**Output:** `build\app\outputs\flutter-apk\app-release.apk`
 
-## 3. Web Build (Optional)
+Transfer to your phone and install (enable "Install from Unknown Sources" if needed).
 
-If you want to host it as a website:
+## Web
 
-1.  Run:
-    ```powershell
-    C:\Users\evion\tools\flutter\bin\flutter.bat build web
-    ```
-2.  **Output Location**:
-    `build\web\`
+```powershell
+flutter build web
+```
+
+**Output:** `build\web\`
+
+Deploy the contents to any static hosting service.
 
 ---
 
 ## Troubleshooting
 
-- **Clean Build**: If you see weird errors, try cleaning the project cache first:
-  ```powershell
-  C:\Users\evion\tools\flutter\bin\flutter.bat clean
-  C:\Users\evion\tools\flutter\bin\flutter.bat pub get
-  ```
+**Clean build** (if you encounter weird errors):
+
+```powershell
+flutter clean
+flutter pub get
+```
+
+**Regenerate Hive adapters** (if you modify data models):
+
+```powershell
+dart run build_runner build --delete-conflicting-outputs
+```

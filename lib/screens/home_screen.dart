@@ -1,3 +1,11 @@
+/// HomeScreen — Main chat interface with sidebar navigation.
+///
+/// Contains the chat message list with Markdown rendering, a streaming
+/// response bubble, the text input bar, and a collapsible sidebar for
+/// managing conversations. Adapts between desktop (side-by-side) and
+/// mobile (drawer) layouts based on screen width.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -167,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               margin: const EdgeInsets.symmetric(vertical: 8),
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: isUser ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surfaceVariant,
+                                color: isUser ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surfaceContainerHighest,
                                 borderRadius: BorderRadius.circular(16).copyWith(
                                   bottomRight: isUser ? Radius.zero : const Radius.circular(16),
                                   bottomLeft: isUser ? const Radius.circular(16) : Radius.zero,
@@ -186,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     _formatTime(msg.createdAt),
                                     style: TextStyle(
                                       fontSize: 10,
-                                      color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
                                     ),
                                   ),
                                 ],

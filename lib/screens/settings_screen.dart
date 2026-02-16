@@ -1,3 +1,10 @@
+/// SettingsScreen — User configuration for API key, model, and theme.
+///
+/// Allows the user to enter their Groq API key, select which LLM model
+/// to use, and toggle dark mode. All settings are persisted locally
+/// via Hive and take effect immediately.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/storage_service.dart';
@@ -66,9 +73,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           TextField(
             controller: _apiKeyController,
             decoration: const InputDecoration(
-              labelText: 'Gemini API Key',
+              labelText: 'Groq API Key',
               border: OutlineInputBorder(),
-              hintText: 'AIza...',
+              hintText: 'gsk_...',
             ),
             obscureText: true,
           ),
@@ -76,6 +83,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Text(
             'Your API key is stored locally on your device.',
             style: TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Model',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          DropdownButtonFormField<String>(
+            value: _settings.selectedModel,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: 'Select Model',
+            ),
+            items: const [
+              DropdownMenuItem(value: 'llama-3.3-70b-versatile', child: Text('Llama 3.3 70B (recommended)')),
+              DropdownMenuItem(value: 'llama-3.1-8b-instant', child: Text('Llama 3.1 8B (fast, lightweight)')),
+              DropdownMenuItem(value: 'gemma2-9b-it', child: Text('Gemma 2 9B (Google)')),
+              DropdownMenuItem(value: 'meta-llama/llama-4-scout-17b-16e-instruct', child: Text('Llama 4 Scout 17B')),
+            ],
+            onChanged: (val) {
+              if (val != null) {
+                setState(() => _settings.selectedModel = val);
+              }
+            },
           ),
           const SizedBox(height: 32),
           ListTile(

@@ -1,5 +1,12 @@
+/// ChatProvider — Core state management for chat interactions.
+///
+/// Manages the active conversation, message list, and streaming state.
+/// Coordinates between [GroqService] (API calls), [StorageService]
+/// (persistence), and [TokenService] (context optimization).
+library;
+
 import 'package:flutter/foundation.dart';
-import '../services/gemini_service.dart';
+import '../services/groq_service.dart';
 import '../services/storage_service.dart';
 import '../services/token_service.dart';
 import '../models/conversation.dart';
@@ -7,19 +14,30 @@ import '../models/message.dart';
 import 'package:uuid/uuid.dart';
 
 class ChatProvider with ChangeNotifier {
-  final GeminiService _geminiService;
+  final GroqService _groqService;
   final StorageService _storageService;
   final TokenService _tokenService;
 
+  /// Whether the AI is currently generating a response.
   bool _isStreaming = false;
+
+  /// The ID of the currently active conversation.
   String? _activeConversationId;
+
+  /// Messages in the active conversation (chronological order).
   List<Message> _messages = [];
+
+  /// All conversations sorted by most recent.
   List<Conversation> _conversations = [];
+
+  /// Accumulates streaming response text as chunks arrive from the API.
   String _streamBuffer = '';
 
-  ChatProvider(this._geminiService, this._storageService, this._tokenService) {
+  ChatProvider(this._groqService, this._storageService, this._tokenService) {
     loadConversations();
   }
+
+  // -- Public getters --
 
   bool get isStreaming => _isStreaming;
   String? get activeConversationId => _activeConversationId;
@@ -27,20 +45,20 @@ class ChatProvider with ChangeNotifier {
   List<Conversation> get conversations => _conversations;
   String get streamBuffer => _streamBuffer;
 
-  // Load all conversations
+  /// Loads all conversations from local storage.
   void loadConversations() {
     _conversations = _storageService.getConversations();
     notifyListeners();
   }
 
-  // Load a specific conversation
+  /// Switches to a specific conversation and loads its messages.
   void loadConversation(String id) {
     _activeConversationId = id;
     _messages = _storageService.getMessages(id);
     notifyListeners();
   }
 
-  // Create new conversation
+  /// Creates a new empty conversation. Optionally sends an initial message.
   Future<void> startNewConversation({String? initialMessage}) async {
     final newId = const Uuid().v4();
     final newConv = Conversation(
@@ -60,22 +78,30 @@ class ChatProvider with ChangeNotifier {
     }
   }
 
-  // Send message
+  /// Sends a user message and streams the AI response.
+  ///
+  /// Flow:
+  /// 1. Validates the API key exists.
+  /// 2. Saves the user message to local storage.
+  /// 3. Auto-titles the conversation from the first user message.
+  /// 4. Calls [GroqService.chatStream] and accumulates streaming tokens.
+  /// 5. Saves the completed AI response to local storage.
   Future<void> sendMessage(String text) async {
+    // If no active conversation, create one first
     if (_activeConversationId == null) {
       await startNewConversation(initialMessage: text);
       return;
     }
 
-    // Check API key
+    // Validate API key is configured
     final settings = _storageService.getSettings();
     final apiKey = settings.apiKey;
     if (apiKey == null || apiKey.isEmpty) {
-      _addErrorMessage('⚠️ Please set your Gemini API key in Settings first.');
+      _addErrorMessage('⚠️ Please set your Groq API key in Settings first.');
       return;
     }
 
-    // 1. Save user message
+    // Save user message locally
     final userMessage = Message(
       id: const Uuid().v4(),
       conversationId: _activeConversationId!,
@@ -86,7 +112,7 @@ class ChatProvider with ChangeNotifier {
     _messages.add(userMessage);
     await _storageService.saveMessage(userMessage);
 
-    // Update conversation title from first message
+    // Auto-title: use the first user message as the conversation title
     if (_messages.where((m) => m.role == 'user').length == 1) {
       final conv = _storageService.getConversation(_activeConversationId!);
       if (conv != null) {
@@ -98,29 +124,28 @@ class ChatProvider with ChangeNotifier {
     loadConversations();
     notifyListeners();
 
-    // 2. Start streaming
+    // Begin streaming AI response
     _isStreaming = true;
     _streamBuffer = '';
     notifyListeners();
 
     try {
-      // 3. Call Gemini API
       final model = settings.selectedModel;
       debugPrint('Using model: $model with key: ${apiKey.substring(0, 5)}...');
 
-      final stream = _geminiService.chatStream(
+      // Stream tokens from Groq API
+      final stream = _groqService.chatStream(
         apiKey: apiKey,
         messages: _messages,
         model: model,
       );
 
-      // 4. Stream response
       await for (final chunk in stream) {
         _streamBuffer += chunk;
-        notifyListeners();
+        notifyListeners(); // Update UI with each new token
       }
 
-      // 5. Finalize AI message
+      // Save completed response
       if (_streamBuffer.isNotEmpty) {
         final aiMessage = Message(
           id: const Uuid().v4(),
@@ -132,10 +157,10 @@ class ChatProvider with ChangeNotifier {
         _messages.add(aiMessage);
         await _storageService.saveMessage(aiMessage);
       } else {
-        _addErrorMessage('⚠️ Received empty response from Gemini. Please try again.');
+        _addErrorMessage('⚠️ Received empty response from Groq. Please try again.');
       }
     } catch (e) {
-      debugPrint('Gemini Error: $e');
+      debugPrint('Groq Error: $e');
       _addErrorMessage('❌ Error: ${e.toString().replaceAll('Exception: ', '')}');
     } finally {
       _isStreaming = false;
@@ -145,6 +170,7 @@ class ChatProvider with ChangeNotifier {
     }
   }
 
+  /// Adds an error message to the chat as a system-generated assistant bubble.
   void _addErrorMessage(String errorText) {
     final errorMsg = Message(
       id: const Uuid().v4(),
